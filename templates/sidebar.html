@@ -1,0 +1,79 @@
+{% load static %}
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon">H</div>
+        <div class="brand-text">
+            HRM System
+            <small>Enterprise Portal</small>
+        </div>
+    </div>
+
+    <div class="sidebar-menu">
+        <div class="menu-label">Main Menu</div>
+        <ul class="nav">
+            <li class="nav-item">
+                <a href="{% url 'dashboard' %}" class="nav-link">
+                    <i class="ri-dashboard-line"></i>
+                    Dashboard
+                </a>
+            </li>
+            {% if user_role == 'admin' or user_role == 'hr_staff' or user_role == 'manager' %}
+            <li class="nav-item">
+                <a href="{% url 'employee_list' %}" class="nav-link">
+                    <i class="ri-group-line"></i>
+                    Employees
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'attendance_list' %}" class="nav-link">
+                    <i class="ri-calendar-check-line"></i>
+                    Attendance
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'reports_index' %}" class="nav-link">
+                    <i class="ri-bar-chart-box-line"></i>
+                    Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'forecast_index' %}" class="nav-link">
+                    <i class="ri-line-chart-line"></i>
+                    Forecast
+                </a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+                <a href="{% url 'leave_list' %}" class="nav-link">
+                    <i class="ri-file-list-3-line"></i>
+                    Leave Management
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'notification_list' %}" class="nav-link">
+                    <i class="ri-notification-3-line"></i>
+                    Notifications
+                    {% if unread_notifications > 0 %}
+                    <span class="badge">{{ unread_notifications }}</span>
+                    {% endif %}
+                </a>
+            </li>
+        </ul>
+
+        <div class="menu-label" style="margin-top: 12px;">Settings</div>
+        <ul class="nav">
+            <li class="nav-item">
+                <a href="{% url 'settings' %}" class="nav-link">
+                    <i class="ri-settings-3-line"></i>
+                    Settings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{% url 'logout' %}" class="nav-link" style="color: rgba(255,255,255,0.5);">
+                    <i class="ri-logout-box-line"></i>
+                    Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+</aside>

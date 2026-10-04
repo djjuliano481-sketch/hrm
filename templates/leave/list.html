@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Leave Management - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>Leave Management</h2>
+        <small>Manage leave requests</small>
+    </div>
+    <a href="{% url 'leave_request' %}" class="btn btn-primary">
+        <i class="ri-add-line"></i> New Leave Request
+    </a>
+</div>
+
+<div class="filter-bar">
+    <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <select name="status" class="form-select" onchange="this.form.submit()" style="min-width:160px;">
+            <option value="">All Status</option>
+            <option value="Pending" {% if status_filter == 'Pending' %}selected{% endif %}>Pending</option>
+            <option value="Approved" {% if status_filter == 'Approved' %}selected{% endif %}>Approved</option>
+            <option value="Rejected" {% if status_filter == 'Rejected' %}selected{% endif %}>Rejected</option>
+            <option value="Cancelled" {% if status_filter == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+        </select>
+        <a href="{% url 'leave_list' %}" class="btn btn-outline btn-sm"><i class="ri-refresh-line"></i> Reset</a>
+    </form>
+</div>
+
+<div class="table-card fade-in">
+    <div class="table-header">
+        <h5>Leave Requests ({{ page_obj.paginator.count }})</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Leave Type</th>
+                    <th>Dates</th>
+                    <th>Days</th>
+                    <th>Status</th>
+                    <th>Date Filed</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for leave in leaves %}
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="avatar">{{ leave.employee.first_name|first|upper }}</div>
+                            <div class="info">
+                                <div class="name">{{ leave.employee.full_name }}</div>
+                                <div class="sub">{{ leave.employee.employee_id }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-info">{{ leave.leave_type.name }}</span></td>
+                    <td>{{ leave.start_date|date:"M d" }} - {{ leave.end_date|date:"M d" }}</td>
+                    <td>{{ leave.number_of_days }}</td>
+                    <td>
+                        <span class="badge badge-{% if leave.status == 'Approved' %}success{% elif leave.status == 'Rejected' %}danger{% elif leave.status == 'Pending' %}warning{% else %}secondary{% endif %}">
+                            {{ leave.status }}
+                        </span>
+                    </td>
+                    <td>{{ leave.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <div style="display:flex;gap:6px;">
+                            <a href="{% url 'leave_detail' leave.pk %}" class="btn btn-sm btn-outline" title="View">
+                                <i class="ri-eye-line"></i>
+                            </a>
+                            {% if leave.status == 'Pending' and is_admin %}
+                            <a href="{% url 'leave_review' leave.pk %}" class="btn btn-sm btn-outline" title="Review" style="color:var(--warning);">
+                                <i class="ri-file-list-line"></i>
+                            </a>
+                            {% endif %}
+                            {% if leave.status == 'Pending' and leave.employee.user == user %}
+                            <a href="{% url 'leave_cancel' leave.pk %}" class="btn btn-sm btn-outline" title="Cancel" style="color:var(--danger);">
+                                <i class="ri-close-line"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--gray-500);">No leave requests found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-link">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-link">&lsaquo;</a>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <a class="page-link active">{{ num }}</a>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <a href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-link">{{ num }}</a>
+        {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-link">&rsaquo;</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="page-link">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

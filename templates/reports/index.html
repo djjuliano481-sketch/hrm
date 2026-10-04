@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Reports - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>Reports</h2>
+        <small>Generate and export reports</small>
+    </div>
+</div>
+
+<div class="report-grid">
+    <a href="{% url 'report_employees' %}" class="report-card fade-in">
+        <div class="report-icon blue"><i class="ri-team-line"></i></div>
+        <h5>Employee Report</h5>
+        <p>Employee master list with department and position details. Exportable to CSV.</p>
+        <span class="btn btn-sm btn-outline">Generate Report <i class="ri-arrow-right-line"></i></span>
+    </a>
+
+    <a href="{% url 'report_attendance' %}" class="report-card fade-in">
+        <div class="report-icon green"><i class="ri-calendar-check-line"></i></div>
+        <h5>Attendance Report</h5>
+        <p>Daily and monthly attendance records with summary statistics. Exportable to CSV.</p>
+        <span class="btn btn-sm btn-outline">Generate Report <i class="ri-arrow-right-line"></i></span>
+    </a>
+
+    <a href="{% url 'report_leaves' %}" class="report-card fade-in">
+        <div class="report-icon yellow"><i class="ri-file-list-3-line"></i></div>
+        <h5>Leave Report</h5>
+        <p>Leave utilization and history report with status breakdown. Exportable to CSV.</p>
+        <span class="btn btn-sm btn-outline">Generate Report <i class="ri-arrow-right-line"></i></span>
+    </a>
+</div>
+{% endblock %}

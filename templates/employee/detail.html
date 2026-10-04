@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ employee.full_name }} - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>Employee Details</h2>
+        <small>{{ employee.employee_id }}</small>
+    </div>
+    <div style="display:flex;gap:8px;">
+        <a href="{% url 'employee_edit' employee.pk %}" class="btn btn-primary">
+            <i class="ri-pencil-line"></i> Edit
+        </a>
+        <a href="{% url 'employee_list' %}" class="btn btn-outline">
+            <i class="ri-arrow-left-line"></i> Back
+        </a>
+    </div>
+</div>
+
+<div class="detail-grid">
+    <div>
+        <div class="profile-card fade-in">
+            {% if employee.profile_photo %}
+            <img src="{{ employee.profile_photo.url }}" alt="Profile" class="profile-photo-img">
+            {% else %}
+            <div class="profile-img">{{ employee.first_name|first|upper }}{{ employee.last_name|first|upper }}</div>
+            {% endif %}
+            <h4>{{ employee.full_name }}</h4>
+            <div class="emp-id">{{ employee.employee_id }}</div>
+            <span class="badge badge-{% if employee.employment_status == 'Active' %}success{% else %}secondary{% endif %}">
+                {{ employee.employment_status }}
+            </span>
+            <div class="info-list">
+                <div class="info-item">
+                    <span class="label">Department</span>
+                    <span class="value">{{ employee.department.name|default:"--" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Position</span>
+                    <span class="value">{{ employee.position|default:"--" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Supervisor</span>
+                    <span class="value">{{ employee.immediate_supervisor|default:"--" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Date Hired</span>
+                    <span class="value">{{ employee.date_hired }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Employment Type</span>
+                    <span class="value">{{ employee.employment_type }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="table-card fade-in" style="margin-bottom:20px;">
+            <div class="table-header"><h5>Personal Information</h5></div>
+            <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div>
+                    <div style="font-size:12px;color:var(--gray-500);">Gender</div>
+                    <div style="font-weight:600;">{{ employee.gender }}</div>
+                </div>
+                <div>
+                    <div style="font-size:12px;color:var(--gray-500);">Birth Date</div>
+                    <div style="font-weight:600;">{{ employee.birth_date }}</div>
+                </div>
+                <div>
+                    <div style="font-size:12px;color:var(--gray-500);">Civil Status</div>
+                    <div style="font-weight:600;">{{ employee.civil_status }}</div>
+                </div>
+                <div>
+                    <div style="font-size:12px;color:var(--gray-500);">Contact</div>
+                    <div style="font-weight:600;">{{ employee.contact_number }}</div>
+                </div>
+                <div>
+                    <div style="font-size:12px;color:var(--gray-500);">Email</div>
+                    <div style="font-weight:600;">{{ employee.email_address }}</div>
+                </div>
+                <div style="grid-column:span 2;">
+                    <div style="font-size:12px;color:var(--gray-500);">Address</div>
+                    <div style="font-weight:600;">{{ employee.address }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-card fade-in" style="margin-bottom:20px;">
+            <div class="table-header"><h5>Recent Attendance</h5></div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead><tr><th>Date</th><th>Time In</th><th>Time Out</th><th>Status</th><th>Hours</th></tr></thead>
+                    <tbody>
+                        {% for att in recent_attendance %}
+                        <tr>
+                            <td>{{ att.date }}</td>
+                            <td>{{ att.time_in|time:"H:i"|default:"--" }}</td>
+                            <td>{{ att.time_out|time:"H:i"|default:"--" }}</td>
+                            <td><span class="badge badge-{% if att.status == 'Present' %}success{% elif att.status == 'Late' %}warning{% else %}danger{% endif %}">{{ att.status }}</span></td>
+                            <td>{{ att.total_working_hours }}h</td>
+                        </tr>
+                        {% empty %}<tr><td colspan="5" style="text-align:center;color:var(--gray-500);">No records</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="table-card fade-in">
+            <div class="table-header"><h5>Recent Leave Requests</h5></div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead><tr><th>Type</th><th>Dates</th><th>Days</th><th>Status</th></tr></thead>
+                    <tbody>
+                        {% for leave in recent_leaves %}
+                        <tr>
+                            <td>{{ leave.leave_type.name }}</td>
+                            <td>{{ leave.start_date|date:"M d" }} - {{ leave.end_date|date:"M d" }}</td>
+                            <td>{{ leave.number_of_days }}</td>
+                            <td><span class="badge badge-{% if leave.status == 'Approved' %}success{% elif leave.status == 'Rejected' %}danger{% elif leave.status == 'Pending' %}warning{% else %}secondary{% endif %}">{{ leave.status }}</span></td>
+                        </tr>
+                        {% empty %}<tr><td colspan="4" style="text-align:center;color:var(--gray-500);">No records</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

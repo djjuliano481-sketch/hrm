@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Cancel Leave - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>Cancel Leave Request</h2>
+    </div>
+</div>
+
+<div class="form-container fade-in" style="text-align:center;margin:0 auto;">
+    <div style="padding:40px;">
+        <div style="width:72px;height:72px;border-radius:50%;background:#FEE2E2;color:var(--danger);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 20px;">
+            <i class="ri-close-circle-line"></i>
+        </div>
+        <h4 style="margin-bottom:8px;">Cancel Leave Request?</h4>
+        <p style="color:var(--gray-500);margin-bottom:24px;">
+            You are about to cancel your <strong>{{ leave.leave_type.name }}</strong> request<br>
+            from {{ leave.start_date }} to {{ leave.end_date }}.
+        </p>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div style="display:flex;gap:10px;justify-content:center;">
+                <button type="submit" class="btn btn-danger btn-lg">
+                    <i class="ri-close-line"></i> Yes, Cancel
+                </button>
+                <a href="{% url 'leave_detail' leave.pk %}" class="btn btn-outline btn-lg">Go Back</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

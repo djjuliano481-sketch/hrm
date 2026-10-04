@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Notifications - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>Notifications</h2>
+        <small>{{ unread_count }} unread notifications</small>
+    </div>
+    <div style="display:flex;gap:8px;">
+        <a href="{% url 'notification_mark_all_read' %}" class="btn btn-primary">
+            <i class="ri-check-double-line"></i> Mark All as Read
+        </a>
+    </div>
+</div>
+
+<div class="table-card fade-in">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Title</th>
+                    <th>Message</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for notif in notifications %}
+                <tr style="{% if not notif.is_read %}background:var(--primary-light);{% endif %}">
+                    <td>
+                        <span class="badge badge-info">{{ notif.notification_type }}</span>
+                    </td>
+                    <td><strong>{{ notif.title }}</strong></td>
+                    <td>{{ notif.message|truncatechars:80 }}</td>
+                    <td>{{ notif.created_at|timesince }} ago</td>
+                    <td>
+                        {% if notif.is_read %}
+                        <span class="badge badge-secondary">Read</span>
+                        {% else %}
+                        <span class="badge badge-warning">New</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'notification_mark_read' notif.pk %}" class="btn btn-sm btn-outline">
+                            <i class="ri-eye-line"></i> View
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" style="text-align:center;padding:60px;color:var(--gray-500);">
+                    <i class="ri-notification-off-line" style="font-size:48px;display:block;margin-bottom:12px;"></i>
+                    No notifications yet.
+                </td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1" class="page-link">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}" class="page-link">&lsaquo;</a>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <a class="page-link active">{{ num }}</a>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+        {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="page-link">&rsaquo;</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,499 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Dashboard - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>Dashboard</h2>
+        <small>Welcome back, {{ user.get_full_name|default:user.username }}!</small>
+    </div>
+    <div class="breadcrumb">
+        <a href="{% url 'dashboard' %}">Home</a>
+        <span class="separator">/</span>
+        <span>Dashboard</span>
+    </div>
+</div>
+
+{% if dashboard_role == 'employee' %}
+    {% if employee %}
+    <div class="detail-grid">
+        <div>
+            <div class="profile-card fade-in">
+                <div class="profile-img">{{ employee.first_name|first|upper }}{{ employee.last_name|first|upper }}</div>
+                <h4>{{ employee.full_name }}</h4>
+                <div class="emp-id">{{ employee.employee_id }}</div>
+                <span class="badge badge-{% if employee.employment_status == 'Active' %}success{% else %}secondary{% endif %}">
+                    {{ employee.employment_status }}
+                </span>
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="label">Department</span>
+                        <span class="value">{{ employee.department.name|default:"--" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Position</span>
+                        <span class="value">{{ employee.position|default:"--" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Date Hired</span>
+                        <span class="value">{{ employee.date_hired }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Employment Type</span>
+                        <span class="value">{{ employee.employment_type }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="dashboard-cards">
+                <div class="stat-card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon blue"><i class="ri-file-list-3-line"></i></div>
+                        <span class="card-label">Pending Leaves</span>
+                    </div>
+                    <div class="card-value">{{ pending_leaves }}</div>
+                </div>
+                <div class="stat-card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon green"><i class="ri-checkbox-circle-line"></i></div>
+                        <span class="card-label">Approved</span>
+                    </div>
+                    <div class="card-value">{{ approved_leaves }}</div>
+                </div>
+                <div class="stat-card fade-in">
+                    <div class="card-header">
+                        <div class="card-icon red"><i class="ri-close-circle-line"></i></div>
+                        <span class="card-label">Rejected</span>
+                    </div>
+                    <div class="card-value">{{ rejected_leaves }}</div>
+                </div>
+            </div>
+
+            <div class="table-card fade-in" style="margin-bottom:20px;">
+                <div class="table-header">
+                    <h5>Personal Information</h5>
+                </div>
+                <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div>
+                        <div style="font-size:12px;color:var(--gray-500);">Contact Number</div>
+                        <div style="font-weight:600;">{{ employee.contact_number|default:"--" }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px;color:var(--gray-500);">Email</div>
+                        <div style="font-weight:600;">{{ employee.email_address }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px;color:var(--gray-500);">Gender</div>
+                        <div style="font-weight:600;">{{ employee.gender }}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px;color:var(--gray-500);">Civil Status</div>
+                        <div style="font-weight:600;">{{ employee.civil_status }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-card fade-in" style="margin-bottom:20px;">
+                <div class="table-header"><h5>Attendance History</h5></div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead><tr><th>Date</th><th>Time In</th><th>Time Out</th><th>Status</th><th>Hours</th></tr></thead>
+                        <tbody>
+                            {% for att in recent_attendance %}
+                            <tr>
+                                <td>{{ att.date }}</td>
+                                <td>{{ att.time_in|time:"H:i"|default:"--" }}</td>
+                                <td>{{ att.time_out|time:"H:i"|default:"--" }}</td>
+                                <td><span class="badge badge-{% if att.status == 'Present' %}success{% elif att.status == 'Late' %}warning{% else %}danger{% endif %}">{{ att.status }}</span></td>
+                                <td>{{ att.total_working_hours }}h</td>
+                            </tr>
+                            {% empty %}<tr><td colspan="5" style="text-align:center;color:var(--gray-500);">No attendance records found.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="table-card fade-in">
+                <div class="table-header"><h5>Leave History</h5></div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead><tr><th>Type</th><th>Dates</th><th>Days</th><th>Status</th></tr></thead>
+                        <tbody>
+                            {% for leave in recent_leaves %}
+                            <tr>
+                                <td>{{ leave.leave_type.name }}</td>
+                                <td>{{ leave.start_date|date:"M d" }} - {{ leave.end_date|date:"M d" }}</td>
+                                <td>{{ leave.number_of_days }}</td>
+                                <td><span class="badge badge-{% if leave.status == 'Approved' %}success{% elif leave.status == 'Rejected' %}danger{% elif leave.status == 'Pending' %}warning{% else %}secondary{% endif %}">{{ leave.status }}</span></td>
+                            </tr>
+                            {% empty %}<tr><td colspan="4" style="text-align:center;color:var(--gray-500);">No leave requests found.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="ri-user-line"></i>
+        <h5>No Employee Profile</h5>
+        <p>Your employee profile has not been set up yet. Please contact HR.</p>
+    </div>
+    {% endif %}
+
+{% elif dashboard_role == 'hr_staff' %}
+    <div class="dashboard-cards">
+        <div class="stat-card fade-in">
+            <div class="card-header">
+                <div class="card-icon blue"><i class="ri-team-line"></i></div>
+                <span class="card-label">Total Employees</span>
+            </div>
+            <div class="card-value">{{ total_employees }}</div>
+            <div class="card-footer"><span>{{ new_employees }}</span> new this month</div>
+        </div>
+        <div class="stat-card fade-in">
+            <div class="card-header">
+                <div class="card-icon green"><i class="ri-checkbox-circle-line"></i></div>
+                <span class="card-label">Present Today</span>
+            </div>
+            <div class="card-value">{{ present_today }}</div>
+            <div class="card-footer"><span>{{ late_today }}</span> late arrivals</div>
+        </div>
+        <div class="stat-card fade-in">
+            <div class="card-header">
+                <div class="card-icon yellow"><i class="ri-time-line"></i></div>
+                <span class="card-label">On Leave</span>
+            </div>
+            <div class="card-value">{{ on_leave_today }}</div>
+        </div>
+        <div class="stat-card fade-in">
+            <div class="card-header">
+                <div class="card-icon red"><i class="ri-close-circle-line"></i></div>
+                <span class="card-label">Absent Today</span>
+            </div>
+            <div class="card-value">{{ absent_today }}</div>
+        </div>
+    </div>
+
+{% else %}
+    <div class="dashboard-cards">
+        <div class="stat-card fade-in">
+            <div class="card-header">
+                <div class="card-icon blue"><i class="ri-team-line"></i></div>
+                <span class="card-label">Total Employees</span>
+            </div>
+            <div class="card-value">{{ total_employees }}</div>
+            <div class="card-footer"><span>{{ new_employees }}</span> new this month</div>
+        </div>
+        <div class="stat-card fade-in">
+            <div class="card-header">
+                <div class="card-icon green"><i class="ri-checkbox-circle-line"></i></div>
+                <span class="card-label">Present Today</span>
+            </div>
+            <div class="card-value">{{ present_today }}</div>
+            <div class="card-footer"><span>{{ late_today }}</span> late arrivals</div>
+        </div>
+        <div class="stat-card fade-in">
+            <div class="card-header">
+                <div class="card-icon yellow"><i class="ri-time-line"></i></div>
+                <span class="card-label">On Leave</span>
+            </div>
+            <div class="card-value">{{ on_leave_today }}</div>
+            <div class="card-footer"><span>{{ pending_leaves }}</span> pending requests</div>
+        </div>
+        <div class="stat-card fade-in">
+            <div class="card-header">
+                <div class="card-icon red"><i class="ri-close-circle-line"></i></div>
+                <span class="card-label">Absent Today</span>
+            </div>
+            <div class="card-value">{{ absent_today }}</div>
+            <div class="card-footer">{{ departments_count }} departments</div>
+        </div>
+    </div>
+
+    <div class="charts-grid">
+        <div class="chart-card fade-in">
+            <div class="chart-header">
+                <h5 class="chart-title">Monthly Attendance Trend</h5>
+            </div>
+            <canvas id="attendanceTrendChart" height="200"></canvas>
+        </div>
+        <div class="chart-card fade-in">
+            <div class="chart-header">
+                <h5 class="chart-title">Employees by Department</h5>
+            </div>
+            <canvas id="deptChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <div class="charts-grid">
+        <div class="chart-card fade-in">
+            <div class="chart-header">
+                <h5 class="chart-title">Employee Growth</h5>
+            </div>
+            <canvas id="employeeGrowthChart" height="180"></canvas>
+        </div>
+        <div class="chart-card fade-in">
+            <div class="chart-header">
+                <h5 class="chart-title">Leave Request Trend</h5>
+            </div>
+            <canvas id="leaveTrendChart" height="180"></canvas>
+        </div>
+    </div>
+
+    <div class="dashboard-cards" style="grid-template-columns: 1fr 1fr;">
+        <div class="table-card fade-in">
+            <div class="table-header">
+                <h5>Today's Attendance</h5>
+                <a href="{% url 'attendance_list' %}" class="btn btn-sm btn-outline">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Status</th>
+                            <th>Time In</th>
+                            <th>Hours</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for att in recent_attendance %}
+                        <tr>
+                            <td>{{ att.employee|default:"--" }}</td>
+                            <td><span class="badge badge-{% if att.status == 'Present' %}success{% elif att.status == 'Late' %}warning{% elif att.status == 'Absent' %}danger{% else %}info{% endif %}">{{ att.status }}</span></td>
+                            <td>{{ att.time_in|time:"H:i"|default:"--" }}</td>
+                            <td>{{ att.total_working_hours }}h</td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" style="text-align:center;color:var(--gray-500);">No attendance records for today.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="table-card fade-in">
+            <div class="table-header">
+                <h5>Pending Leave Requests</h5>
+                <a href="{% url 'leave_list' %}?status=Pending" class="btn btn-sm btn-outline">View All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>Leave Type</th>
+                            <th>Dates</th>
+                            <th>Days</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leave in recent_leaves %}
+                        <tr data-leave-id="{{ leave.pk }}">
+                            <td>
+                                <div class="user-cell">
+                                    <div class="avatar">{{ leave.employee.first_name|first|upper }}</div>
+                                    <div class="info">
+                                        <div class="name">{{ leave.employee.full_name }}</div>
+                                        <div class="sub">{{ leave.employee.employee_id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ leave.leave_type.name }}</td>
+                            <td>{{ leave.start_date|date:"M d" }} - {{ leave.end_date|date:"M d" }}</td>
+                            <td>{{ leave.number_of_days }}</td>
+                            <td>
+                                <div style="display:flex;gap:6px;">
+                                    <button type="button" class="btn btn-sm btn-approve" data-leave-id="{{ leave.pk }}" style="background:var(--success);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;">
+                                        <i class="ri-check-line"></i> Approve
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-reject" data-leave-id="{{ leave.pk }}" style="background:var(--danger);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:12px;">
+                                        <i class="ri-close-line"></i> Reject
+                                    </button>
+                                    <a href="{% url 'leave_review' leave.pk %}" class="btn btn-sm btn-outline" title="Review" style="padding:4px 8px;">
+                                        <i class="ri-file-list-line"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="5" style="text-align:center;color:var(--gray-500);">No pending leave requests.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+    <div id="rejectModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:12px;padding:24px;width:90%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+            <h5 style="margin:0 0 8px;">Reject Leave Request</h5>
+            <p style="color:var(--gray-500);font-size:13px;margin:0 0 16px;" id="rejectModalEmployee"></p>
+            <div class="form-group">
+                <label>Reason for Rejection</label>
+                <textarea id="rejectReasonInput" class="form-control" rows="4" placeholder="Provide a reason..." style="margin-top:4px;"></textarea>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:16px;justify-content:flex-end;">
+                <button type="button" id="cancelRejectBtn" class="btn btn-outline">Cancel</button>
+                <button type="button" id="confirmRejectBtn" class="btn btn-danger">Confirm Rejection</button>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if dashboard_role == 'admin' %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initCharts({
+        deptLabels: {{ dept_labels|safe }},
+        deptData: {{ dept_data|safe }},
+        attendanceLabels: {{ attendance_labels|safe }},
+        attendanceData: {{ attendance_data|safe }},
+        employeeGrowthLabels: {{ employee_growth_labels|safe }},
+        employeeGrowthData: {{ employee_growth_data|safe }},
+        leaveTrendLabels: {{ leave_trend_labels|safe }},
+        leaveTrendData: {{ leave_trend_data|safe }},
+    });
+
+    function getCSRFToken() {
+        var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfInput) return csrfInput.value;
+        var meta = document.querySelector('meta[name="csrf-token"]');
+        return meta ? meta.getAttribute('content') : '';
+    }
+
+    function showMessage(text, type) {
+        var container = document.getElementById('messagesContainer');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'messagesContainer';
+            document.querySelector('.page-content').insertBefore(container, document.querySelector('.page-content').firstChild);
+        }
+        var icon = type === 'success' ? 'ri-checkbox-circle-fill' : 'ri-error-warning-fill';
+        var alert = document.createElement('div');
+        alert.className = 'alert alert-' + type + ' fade-in';
+        alert.innerHTML = '<i class="' + icon + '"></i> ' + text;
+        container.appendChild(alert);
+        setTimeout(function() {
+            alert.style.transition = 'opacity 0.5s ease';
+            alert.style.opacity = '0';
+            setTimeout(function() { if (alert.parentNode) alert.remove(); }, 500);
+        }, 5000);
+    }
+
+    function removeRow(leaveId) {
+        var row = document.querySelector('tr[data-leave-id="' + leaveId + '"]');
+        if (row) {
+            row.style.transition = 'opacity 0.3s ease';
+            row.style.opacity = '0';
+            setTimeout(function() { if (row.parentNode) row.remove(); }, 300);
+        }
+    }
+
+    document.querySelectorAll('.btn-approve').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var leaveId = this.getAttribute('data-leave-id');
+            var formData = new FormData();
+            formData.append('action', 'approve');
+            formData.append('csrfmiddlewaretoken', getCSRFToken());
+
+            fetch('/leave/' + leaveId + '/decision/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    showMessage('Leave request approved!', 'success');
+                    removeRow(leaveId);
+                } else {
+                    showMessage(data.error || 'Failed to approve.', 'error');
+                }
+            })
+            .catch(function() {
+                showMessage('Network error. Please try again.', 'error');
+            });
+        });
+    });
+
+    var currentRejectId = null;
+    var rejectModal = document.getElementById('rejectModal');
+    var rejectReasonInput = document.getElementById('rejectReasonInput');
+    var confirmRejectBtn = document.getElementById('confirmRejectBtn');
+    var cancelRejectBtn = document.getElementById('cancelRejectBtn');
+
+    document.querySelectorAll('.btn-reject').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            currentRejectId = this.getAttribute('data-leave-id');
+            var row = this.closest('tr');
+            var name = row ? row.querySelector('.name').textContent : '';
+            document.getElementById('rejectModalEmployee').textContent = 'Leave request by ' + name;
+            rejectReasonInput.value = '';
+            rejectModal.style.display = 'flex';
+        });
+    });
+
+    if (cancelRejectBtn) {
+        cancelRejectBtn.addEventListener('click', function() {
+            rejectModal.style.display = 'none';
+            currentRejectId = null;
+        });
+    }
+
+    if (rejectModal) {
+        rejectModal.addEventListener('click', function(e) {
+            if (e.target === rejectModal) {
+                rejectModal.style.display = 'none';
+                currentRejectId = null;
+            }
+        });
+    }
+
+    if (confirmRejectBtn) {
+        confirmRejectBtn.addEventListener('click', function() {
+            var reason = rejectReasonInput.value.trim();
+            if (!reason) {
+                showMessage('Please provide a reason for rejection.', 'error');
+                return;
+            }
+            var formData = new FormData();
+            formData.append('action', 'reject');
+            formData.append('rejection_reason', reason);
+            formData.append('csrfmiddlewaretoken', getCSRFToken());
+
+            fetch('/leave/' + currentRejectId + '/decision/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                rejectModal.style.display = 'none';
+                if (data.success) {
+                    showMessage('Leave request rejected.', 'success');
+                    removeRow(currentRejectId);
+                } else {
+                    showMessage(data.error || 'Failed to reject.', 'error');
+                }
+                currentRejectId = null;
+            })
+            .catch(function() {
+                showMessage('Network error. Please try again.', 'error');
+                rejectModal.style.display = 'none';
+                currentRejectId = null;
+            });
+        });
+    }
+});
+</script>
+{% endif %}
+{% endblock %}

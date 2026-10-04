@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Leave Report - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>Leave Report</h2>
+    </div>
+    <a href="{% url 'reports_index' %}" class="btn btn-outline"><i class="ri-arrow-left-line"></i> Back</a>
+</div>
+
+<div class="filter-bar">
+    <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        {{ form.start_date }}
+        {{ form.end_date }}
+        {{ form.department }}
+        <button type="submit" class="btn btn-primary btn-sm"><i class="ri-search-line"></i> Generate</button>
+        <a href="?start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}&export=csv" class="btn btn-success btn-sm">
+            <i class="ri-download-line"></i> CSV
+        </a>
+    </form>
+</div>
+
+<div class="table-card fade-in">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Department</th>
+                    <th>Leave Type</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Days</th>
+                    <th>Status</th>
+                    <th>Filed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td><strong>{{ r.employee.employee_id }}</strong><br><small style="color:var(--gray-500);">{{ r.employee.full_name }}</small></td>
+                    <td>{{ r.employee.department.name|default:"--" }}</td>
+                    <td><span class="badge badge-info">{{ r.leave_type.name }}</span></td>
+                    <td>{{ r.start_date }}</td>
+                    <td>{{ r.end_date }}</td>
+                    <td>{{ r.number_of_days }}</td>
+                    <td>
+                        <span class="badge badge-{% if r.status == 'Approved' %}success{% elif r.status == 'Rejected' %}danger{% elif r.status == 'Pending' %}warning{% else %}secondary{% endif %}">
+                            {{ r.status }}
+                        </span>
+                    </td>
+                    <td>{{ r.created_at|date:"M d, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--gray-500);">Select date range and generate report.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

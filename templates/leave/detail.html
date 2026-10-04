@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Leave Detail - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>Leave Request Details</h2>
+    </div>
+    <a href="{% url 'leave_list' %}" class="btn btn-outline"><i class="ri-arrow-left-line"></i> Back</a>
+</div>
+
+<div class="detail-grid">
+    <div>
+        <div class="profile-card fade-in">
+            <div class="profile-img">{{ leave.employee.first_name|first|upper }}{{ leave.employee.last_name|first|upper }}</div>
+            <h4>{{ leave.employee.full_name }}</h4>
+            <div class="emp-id">{{ leave.employee.employee_id }}</div>
+            <div style="margin-top:8px;">
+                <span class="badge badge-{% if leave.status == 'Approved' %}success{% elif leave.status == 'Rejected' %}danger{% elif leave.status == 'Pending' %}warning{% else %}secondary{% endif %}" style="font-size:16px;padding:6px 20px;">
+                    {{ leave.status }}
+                </span>
+            </div>
+            <div class="info-list">
+                <div class="info-item"><span class="label">Department</span><span class="value">{{ leave.employee.department.name|default:"--" }}</span></div>
+                <div class="info-item"><span class="label">Position</span><span class="value">{{ leave.employee.position|default:"--" }}</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="table-card fade-in">
+            <div class="table-header"><h5>Leave Information</h5></div>
+            <div style="padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div><div style="font-size:12px;color:var(--gray-500);">Leave Type</div><div style="font-weight:600;"><span class="badge badge-info">{{ leave.leave_type.name }}</span></div></div>
+                <div><div style="font-size:12px;color:var(--gray-500);">Number of Days</div><div style="font-weight:600;">{{ leave.number_of_days }}</div></div>
+                <div><div style="font-size:12px;color:var(--gray-500);">Start Date</div><div style="font-weight:600;">{{ leave.start_date }}</div></div>
+                <div><div style="font-size:12px;color:var(--gray-500);">End Date</div><div style="font-weight:600;">{{ leave.end_date }}</div></div>
+                <div style="grid-column:span 2;"><div style="font-size:12px;color:var(--gray-500);">Reason</div><div style="font-weight:600;">{{ leave.reason }}</div></div>
+                {% if leave.approved_by %}
+                <div><div style="font-size:12px;color:var(--gray-500);">Approved By</div><div style="font-weight:600;">{{ leave.approved_by.full_name }}</div></div>
+                <div><div style="font-size:12px;color:var(--gray-500);">Approved At</div><div style="font-weight:600;">{{ leave.approved_at|date:"M d, Y H:i" }}</div></div>
+                {% endif %}
+                {% if leave.rejection_reason %}
+                <div style="grid-column:span 2;">
+                    <div style="font-size:12px;color:var(--gray-500);">Rejection Reason</div>
+                    <div style="font-weight:600;color:var(--danger);">{{ leave.rejection_reason }}</div>
+                </div>
+                {% endif %}
+                {% if leave.supporting_document %}
+                <div style="grid-column:span 2;">
+                    <a href="{{ leave.supporting_document.url }}" class="btn btn-sm btn-outline" target="_blank">
+                        <i class="ri-file-line"></i> View Document
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:16px;">
+            {% if leave.status == 'Pending' %}
+            {% if user_role == 'admin' or user.is_superuser %}
+            <a href="{% url 'leave_review' leave.pk %}" class="btn btn-primary">
+                <i class="ri-file-list-line"></i> Review Request
+            </a>
+            {% endif %}
+            {% if leave.employee.user == user %}
+            <a href="{% url 'leave_cancel' leave.pk %}" class="btn btn-outline" style="color:var(--danger);border-color:var(--danger);">
+                <i class="ri-close-line"></i> Cancel Request
+            </a>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

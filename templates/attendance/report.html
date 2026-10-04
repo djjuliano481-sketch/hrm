@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Attendance Report - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>Attendance Report</h2>
+        <small>Generate attendance summaries</small>
+    </div>
+    <a href="{% url 'attendance_list' %}" class="btn btn-outline"><i class="ri-arrow-left-line"></i> Back</a>
+</div>
+
+<div class="filter-bar">
+    <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;width:100%;">
+        {% csrf_token %}
+        {{ form.start_date }}
+        {{ form.end_date }}
+        <button type="submit" class="btn btn-primary btn-sm"><i class="ri-search-line"></i> Generate</button>
+    </form>
+</div>
+
+{% if summary %}
+<div class="stats-summary">
+    <div class="stat-item"><div class="stat-value">{{ summary.total_records }}</div><div class="stat-label">Total Records</div></div>
+    <div class="stat-item"><div class="stat-value" style="color:var(--success);">{{ summary.total_present }}</div><div class="stat-label">Present</div></div>
+    <div class="stat-item"><div class="stat-value" style="color:var(--warning);">{{ summary.total_late }}</div><div class="stat-label">Late</div></div>
+    <div class="stat-item"><div class="stat-value" style="color:var(--danger);">{{ summary.total_absent }}</div><div class="stat-label">Absent</div></div>
+    <div class="stat-item"><div class="stat-value">{{ summary.avg_hours }}h</div><div class="stat-label">Avg Hours</div></div>
+    <div class="stat-item"><div class="stat-value" style="color:var(--primary);">{{ summary.total_overtime_hours }}h</div><div class="stat-label">Overtime</div></div>
+</div>
+{% endif %}
+
+<div class="table-card fade-in">
+    <div class="table-header">
+        <h5>Attendance Records</h5>
+        <a href="?start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}&export=csv" class="btn btn-sm btn-outline">
+            <i class="ri-download-line"></i> Export CSV
+        </a>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Date</th>
+                    <th>Time In</th>
+                    <th>Time Out</th>
+                    <th>Status</th>
+                    <th>Late</th>
+                    <th>Hours</th>
+                    <th>OT</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td>{{ r.employee|default:"--" }}</td>
+                    <td>--</td>
+                    <td>{{ r.date }}</td>
+                    <td>{{ r.time_in|time:"H:i"|default:"--" }}</td>
+                    <td>{{ r.time_out|time:"H:i"|default:"--" }}</td>
+                    <td><span class="badge badge-{% if r.status == 'Present' %}success{% elif r.status == 'Late' %}warning{% else %}danger{% endif %}">{{ r.status }}</span></td>
+                    <td>{% if r.late_minutes > 0 %}{{ r.late_minutes }}m{% else %}--{% endif %}</td>
+                    <td>{{ r.total_working_hours }}h</td>
+                    <td>{% if r.overtime_hours > 0 %}{{ r.overtime_hours }}h{% else %}--{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--gray-500);">No records. Select dates and generate report.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

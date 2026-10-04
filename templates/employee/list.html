@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Employees - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>Employees</h2>
+        <small>Manage all employee records</small>
+    </div>
+    <div>
+        <a href="{% url 'employee_add' %}" class="btn btn-primary">
+            <i class="ri-user-add-line"></i> Add Employee
+        </a>
+    </div>
+</div>
+
+<div class="filter-bar">
+    <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;width:100%;">
+        <input type="text" name="search" class="form-control" placeholder="Search by name or ID..." value="{{ search_query }}" style="min-width:220px;">
+        <select name="department" class="form-select" onchange="this.form.submit()">
+            <option value="">All Departments</option>
+            {% for dept in departments %}
+            <option value="{{ dept.id }}" {% if selected_department == dept.id|stringformat:'s' %}selected{% endif %}>{{ dept.name }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" name="position" class="form-control" placeholder="Search Position" value="{{ selected_position }}" onchange="this.form.submit()">
+        <select name="status" class="form-select" onchange="this.form.submit()">
+            <option value="">All Status</option>
+            <option value="Active" {% if selected_status == 'Active' %}selected{% endif %}>Active</option>
+            <option value="Resigned" {% if selected_status == 'Resigned' %}selected{% endif %}>Resigned</option>
+            <option value="Terminated" {% if selected_status == 'Terminated' %}selected{% endif %}>Terminated</option>
+        </select>
+        <button type="submit" class="btn btn-primary btn-sm"><i class="ri-search-line"></i> Search</button>
+        <a href="{% url 'employee_list' %}" class="btn btn-outline btn-sm"><i class="ri-refresh-line"></i> Reset</a>
+    </form>
+</div>
+
+<div class="table-card fade-in">
+    <div class="table-header">
+        <h5>All Employees ({{ page_obj.paginator.count }})</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Employee ID</th>
+                    <th>Name</th>
+                    <th>Department</th>
+                    <th>Position</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for emp in employees %}
+                <tr>
+                    <td><strong>{{ emp.employee_id }}</strong></td>
+                    <td>
+                        <div class="user-cell">
+                            <div class="avatar">{{ emp.first_name|first|upper }}{{ emp.last_name|first|upper }}</div>
+                            <div class="info">
+                                <div class="name">{{ emp.full_name }}</div>
+                                <div class="sub">{{ emp.email_address }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ emp.department.name|default:"--" }}</td>
+                    <td>{{ emp.position|default:"--" }}</td>
+                    <td>{{ emp.employment_type }}</td>
+                    <td>
+                        <span class="badge badge-{% if emp.employment_status == 'Active' %}success{% elif emp.employment_status == 'Resigned' %}secondary{% else %}danger{% endif %}">
+                            {{ emp.employment_status }}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display:flex;gap:6px;">
+                            <a href="{% url 'employee_detail' emp.pk %}" class="btn btn-sm btn-outline" title="View">
+                                <i class="ri-eye-line"></i>
+                            </a>
+                            <a href="{% url 'employee_edit' emp.pk %}" class="btn btn-sm btn-outline" title="Edit">
+                                <i class="ri-pencil-line"></i>
+                            </a>
+                            <a href="{% url 'employee_delete' emp.pk %}" class="btn btn-sm btn-outline" title="Delete" style="color:var(--danger);">
+                                <i class="ri-delete-bin-line"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--gray-500);">No employees found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_department %}&department={{ selected_department }}{% endif %}" class="page-link">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_department %}&department={{ selected_department }}{% endif %}" class="page-link">&lsaquo;</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <a class="page-link active">{{ num }}</a>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_department %}&department={{ selected_department }}{% endif %}" class="page-link">{{ num }}</a>
+        {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_department %}&department={{ selected_department }}{% endif %}" class="page-link">&rsaquo;</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_department %}&department={{ selected_department }}{% endif %}" class="page-link">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

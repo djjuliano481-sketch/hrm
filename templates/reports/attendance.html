@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Attendance Report - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>Attendance Report</h2>
+    </div>
+    <a href="{% url 'reports_index' %}" class="btn btn-outline"><i class="ri-arrow-left-line"></i> Back</a>
+</div>
+
+<div class="filter-bar">
+    <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        {{ form.start_date }}
+        {{ form.end_date }}
+        <button type="submit" class="btn btn-primary btn-sm"><i class="ri-search-line"></i> Generate</button>
+        <a href="?start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}&export=csv" class="btn btn-success btn-sm">
+            <i class="ri-download-line"></i> CSV
+        </a>
+    </form>
+</div>
+
+<div class="table-card fade-in">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Date</th>
+                    <th>Time In</th>
+                    <th>Time Out</th>
+                    <th>Status</th>
+                    <th>Late</th>
+                    <th>Hours</th>
+                    <th>OT</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td>{{ r.employee|default:"--" }}</td>
+                    <td>--</td>
+                    <td>{{ r.date }}</td>
+                    <td>{{ r.time_in|time:"H:i"|default:"--" }}</td>
+                    <td>{{ r.time_out|time:"H:i"|default:"--" }}</td>
+                    <td><span class="badge badge-{% if r.status == 'Present' %}success{% elif r.status == 'Late' %}warning{% else %}danger{% endif %}">{{ r.status }}</span></td>
+                    <td>{% if r.late_minutes > 0 %}{{ r.late_minutes }}m{% else %}--{% endif %}</td>
+                    <td>{{ r.total_working_hours }}h</td>
+                    <td>{% if r.overtime_hours > 0 %}{{ r.overtime_hours }}h{% else %}--{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" style="text-align:center;padding:40px;color:var(--gray-500);">Select date range and generate report.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

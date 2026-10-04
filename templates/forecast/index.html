@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Employee Forecast - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>Employee Forecasting</h2>
+        <small>Linear Regression based employee growth prediction</small>
+    </div>
+    <div class="breadcrumb">
+        <a href="{% url 'dashboard' %}">Home</a>
+        <span class="separator">/</span>
+        <span>Forecast</span>
+    </div>
+</div>
+
+{% if no_data %}
+<div class="empty-state">
+    <i class="ri-bar-chart-2-line"></i>
+    <h5>No Employee Data</h5>
+    <p>Add employees with hire dates to generate forecasts.</p>
+</div>
+{% else %}
+
+<div class="dashboard-cards">
+    <div class="stat-card fade-in">
+        <div class="card-header">
+            <div class="card-icon blue"><i class="ri-team-line"></i></div>
+            <span class="card-label">Current Employees</span>
+        </div>
+        <div class="card-value">{{ total_employees }}</div>
+        <div class="card-footer">Based on <span>{{ total_months }}</span> months of data</div>
+    </div>
+    <div class="stat-card fade-in">
+        <div class="card-header">
+            <div class="card-icon green"><i class="ri-line-chart-line"></i></div>
+            <span class="card-label">Growth Rate</span>
+        </div>
+        <div class="card-value">{{ coefficient }}</div>
+        <div class="card-footer">employees per month (slope)</div>
+    </div>
+    <div class="stat-card fade-in">
+        <div class="card-header">
+            <div class="card-icon purple"><i class="ri-radar-line"></i></div>
+            <span class="card-label">R-squared</span>
+        </div>
+        <div class="card-value">{{ r2 }}</div>
+        <div class="card-footer">model accuracy score</div>
+    </div>
+    <div class="stat-card fade-in">
+        <div class="card-header">
+            <div class="card-icon yellow"><i class="ri-eye-line"></i></div>
+            <span class="card-label">Forecast Months</span>
+        </div>
+        <div class="card-value">{{ forecast_months_count }}</div>
+        <div class="card-footer">next {{ forecast_months_count }} months predicted</div>
+    </div>
+</div>
+
+<div class="charts-grid">
+    <div class="chart-card fade-in" style="grid-column: 1 / -1;">
+        <div class="chart-header">
+            <h5 class="chart-title">Employee Growth Forecast</h5>
+        </div>
+        <div style="padding: 16px; text-align: center;">
+            <img src="data:image/png;base64,{{ chart }}" alt="Forecast Chart" style="max-width: 100%; height: auto; border-radius: 8px;">
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-cards" style="grid-template-columns: 1fr 1fr;">
+    <div class="table-card fade-in">
+        <div class="table-header">
+            <h5>Historical Employee Count</h5>
+        </div>
+        <div class="table-responsive" style="max-height: 320px; overflow-y: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Total Employees</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for month, count in historical_data %}
+                    <tr>
+                        <td>{{ month }}</td>
+                        <td><strong>{{ count }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="table-card fade-in">
+        <div class="table-header">
+            <h5>Forecasted Values</h5>
+            <a href="{{ MEDIA_URL }}forecast/employee_forecast.csv" class="btn btn-sm btn-outline" download>
+                <i class="ri-download-line"></i> CSV
+            </a>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Forecasted Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for month, count in forecast_data %}
+                    <tr>
+                        <td>{{ month }}</td>
+                        <td><strong>{{ count }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="table-card fade-in" style="margin-top: 20px;">
+    <div class="table-header">
+        <h5>Model Details</h5>
+    </div>
+    <div style="padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+        <div>
+            <div style="font-size: 12px; color: var(--gray-500);">Intercept</div>
+            <div style="font-weight: 600;">{{ intercept }}</div>
+        </div>
+        <div>
+            <div style="font-size: 12px; color: var(--gray-500);">Coefficient (Slope)</div>
+            <div style="font-weight: 600;">{{ coefficient }}</div>
+        </div>
+        <div>
+            <div style="font-size: 12px; color: var(--gray-500);">Mean Squared Error</div>
+            <div style="font-weight: 600;">{{ mse }}</div>
+        </div>
+        <div>
+            <div style="font-size: 12px; color: var(--gray-500);">R-squared Score</div>
+            <div style="font-weight: 600;">{{ r2 }}</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Attendance - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>Attendance Records</h2>
+        <small>Track employee attendance</small>
+    </div>
+    <div style="display:flex;gap:8px;">
+        <a href="{% url 'attendance_report' %}" class="btn btn-outline">
+            <i class="ri-bar-chart-line"></i> Reports
+        </a>
+        {% if user.is_superuser %}
+        <a href="{% url 'attendance_add' %}" class="btn btn-primary">
+            <i class="ri-add-line"></i> Add Record
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="filter-bar">
+    <form method="GET" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;width:100%;">
+        <input type="text" name="employee" class="form-control" placeholder="Search Employee" value="{{ request.GET.employee }}" onchange="this.form.submit()">
+        <input type="date" name="date_from" class="form-control" value="{{ request.GET.date_from }}" placeholder="From">
+        <input type="date" name="date_to" class="form-control" value="{{ request.GET.date_to }}" placeholder="To">
+        <button type="submit" class="btn btn-primary btn-sm"><i class="ri-filter-line"></i> Filter</button>
+        <a href="{% url 'attendance_list' %}" class="btn btn-outline btn-sm"><i class="ri-refresh-line"></i> Reset</a>
+    </form>
+</div>
+
+<div class="table-card fade-in">
+    <div class="table-header">
+        <h5>Attendance Records ({{ page_obj.paginator.count }})</h5>
+        <a href="?export=csv" class="btn btn-sm btn-outline">
+            <i class="ri-download-line"></i> Export CSV
+        </a>
+    </div>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Date</th>
+                    <th>Time In</th>
+                    <th>Time Out</th>
+                    <th>Status</th>
+                    <th>Late</th>
+                    <th>Hours</th>
+                    {% if user.is_superuser %}<th>Actions</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ record.employee|default:"--" }}</td>
+                    <td>{{ record.date }}</td>
+                    <td>{{ record.time_in|time:"H:i"|default:"--" }}</td>
+                    <td>{{ record.time_out|time:"H:i"|default:"--" }}</td>
+                    <td>
+                        <span class="badge badge-{% if record.status == 'Present' %}success{% elif record.status == 'Late' %}warning{% elif record.status == 'Absent' %}danger{% else %}info{% endif %}">
+                            {{ record.status }}
+                        </span>
+                    </td>
+                    <td>{% if record.late_minutes > 0 %}{{ record.late_minutes }}m{% else %}--{% endif %}</td>
+                    <td>{{ record.total_working_hours }}h</td>
+                    {% if user.is_superuser %}
+                    <td>
+                        <a href="{% url 'attendance_edit' record.pk %}" class="btn btn-sm btn-outline">
+                            <i class="ri-pencil-line"></i>
+                        </a>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                <tr><td colspan="{% if user.is_superuser %}8{% else %}7{% endif %}" style="text-align:center;padding:40px;color:var(--gray-500);">No attendance records found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1" class="page-link">&laquo;</a>
+        <a href="?page={{ page_obj.previous_page_number }}" class="page-link">&lsaquo;</a>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <a class="page-link active">{{ num }}</a>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+        {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="page-link">&rsaquo;</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}" class="page-link">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% load static %}
+<nav class="top-navbar">
+    <div class="navbar-left">
+        <button class="toggle-sidebar" id="toggleSidebar">
+            <i class="ri-menu-line"></i>
+        </button>
+        <div class="search-box">
+            <i class="ri-search-line"></i>
+            <form method="GET" action="{% url 'employee_list' %}" style="display:inline;">
+                <input type="text" name="search" placeholder="Search employees..." value="{{ search_query|default:'' }}">
+            </form>
+        </div>
+    </div>
+
+    <div class="navbar-right">
+        <div class="position-relative">
+            <button class="nav-icon" id="notificationBtn">
+                <i class="ri-notification-3-line"></i>
+                {% if unread_notifications > 0 %}
+                <span class="notification-dot">{{ unread_notifications }}</span>
+                {% endif %}
+            </button>
+
+            <div class="notif-dropdown" id="notificationDropdown">
+                <div class="notif-header">
+                    <span>Notifications</span>
+                    <a href="{% url 'notification_mark_all_read' %}">Mark all as read</a>
+                </div>
+                {% for notif in recent_notifications %}
+                <a href="{% url 'notification_mark_read' notif.pk %}" class="notif-item {% if not notif.is_read %}unread{% endif %}">
+                    <div class="notif-icon" style="background: {% if 'Approved' in notif.title %}#D1FAE5;color:#065F46{% elif 'Rejected' in notif.title %}#FEE2E2;color:#991B1B{% else %}{{ primary_light }};color:{{ primary }}{% endif %};">
+                        <i class="ri-{% if 'Leave' in notif.notification_type %}file-list-line{% elif 'Employee' in notif.notification_type %}user-add-line{% else %}information-line{% endif %}"></i>
+                    </div>
+                    <div class="notif-content">
+                        <div class="title">{{ notif.title }}</div>
+                        <div class="message">{{ notif.message|truncatechars:60 }}</div>
+                        <div class="time">{{ notif.created_at|timesince }} ago</div>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="notif-item">
+                    <div class="notif-content">
+                        <div class="message" style="text-align:center;">No notifications yet</div>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="notif-footer">
+                    <a href="{% url 'notification_list' %}">View All Notifications</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="position-relative">
+            <div class="user-dropdown" id="userDropdownBtn">
+                <div class="user-avatar">
+                    {% with name=user.get_full_name|default:user.username %}
+                    {{ name|make_list|first|upper }}
+                    {% endwith %}
+                </div>
+                <div class="user-info">
+                    <div class="name">{{ user.get_full_name|default:user.username }}</div>
+                    <div class="role">{{ user_role_display|default:"Employee" }}</div>
+                </div>
+                <i class="ri-arrow-down-s-line" style="color:var(--gray-400);font-size:18px;"></i>
+            </div>
+
+            <div class="user-dropdown-menu" id="userDropdownMenu">
+                <a href="{% url 'settings' %}" class="dropdown-item">
+                    <i class="ri-user-line"></i>
+                    My Profile
+                </a>
+                <a href="{% url 'password_reset' %}" class="dropdown-item">
+                    <i class="ri-lock-line"></i>
+                    Change Password
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="{% url 'logout' %}" class="dropdown-item">
+                    <i class="ri-logout-box-line"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>

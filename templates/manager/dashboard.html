@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}My Team - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>My Team</h2>
+        <small>Team monitoring and leave approval</small>
+    </div>
+</div>
+
+<div class="dashboard-cards">
+    <div class="stat-card fade-in">
+        <div class="card-header">
+            <div class="card-icon blue"><i class="ri-team-line"></i></div>
+            <span class="card-label">Team Members</span>
+        </div>
+        <div class="card-value">{{ team_count }}</div>
+    </div>
+    <div class="stat-card fade-in">
+        <div class="card-header">
+            <div class="card-icon yellow"><i class="ri-time-line"></i></div>
+            <span class="card-label">On Leave Today</span>
+        </div>
+        <div class="card-value">{{ on_leave_today }}</div>
+    </div>
+    <div class="stat-card fade-in">
+        <div class="card-header">
+            <div class="card-icon green"><i class="ri-checkbox-circle-line"></i></div>
+            <span class="card-label">Approved (This Month)</span>
+        </div>
+        <div class="card-value">{{ team_approved_leaves }}</div>
+    </div>
+    <div class="stat-card fade-in">
+        <div class="card-header">
+            <div class="card-icon red"><i class="ri-file-list-3-line"></i></div>
+            <span class="card-label">Pending Requests</span>
+        </div>
+        <div class="card-value">{{ pending_count }}</div>
+    </div>
+</div>
+
+<div class="dashboard-cards" style="grid-template-columns: 1fr 1fr;">
+    <div class="table-card fade-in">
+        <div class="table-header">
+            <h5>Pending Leave Requests</h5>
+            <a href="{% url 'leave_list' %}?status=Pending" class="btn btn-sm btn-outline">View All</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Leave Type</th>
+                        <th>Dates</th>
+                        <th>Days</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for leave in team_pending_leaves %}
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar">{{ leave.employee.first_name|first|upper }}</div>
+                                <div class="info">
+                                    <div class="name">{{ leave.employee.full_name }}</div>
+                                    <div class="sub">{{ leave.employee.employee_id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge badge-info">{{ leave.leave_type.name }}</span></td>
+                        <td>{{ leave.start_date|date:"M d" }} - {{ leave.end_date|date:"M d" }}</td>
+                        <td>{{ leave.number_of_days }}</td>
+                        <td>
+                            <div style="display:flex;gap:6px;">
+                                <a href="{% url 'leave_review' leave.pk %}" class="btn btn-sm btn-success" title="Approve">
+                                    <i class="ri-check-line"></i>
+                                </a>
+                                <a href="{% url 'leave_review' leave.pk %}" class="btn btn-sm btn-danger" title="Reject">
+                                    <i class="ri-close-line"></i>
+                                </a>
+                                <a href="{% url 'leave_detail' leave.pk %}" class="btn btn-sm btn-outline" title="View">
+                                    <i class="ri-eye-line"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--gray-500);">No pending leave requests from your team.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="table-card fade-in">
+        <div class="table-header">
+            <h5>Team Members</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Department</th>
+                        <th>Position</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in team_members %}
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                <div class="avatar">{{ member.first_name|first|upper }}{{ member.last_name|first|upper }}</div>
+                                <div class="info">
+                                    <div class="name">{{ member.full_name }}</div>
+                                    <div class="sub">{{ member.employee_id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ member.department.name|default:"--" }}</td>
+                        <td>{{ member.position|default:"--" }}</td>
+                        <td>
+                            <span class="badge badge-{% if member.employment_status == 'Active' %}success{% elif member.employment_status == 'Inactive' %}secondary{% else %}warning{% endif %}">
+                                {{ member.employment_status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" style="text-align:center;padding:40px;color:var(--gray-500);">No team members assigned to you.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

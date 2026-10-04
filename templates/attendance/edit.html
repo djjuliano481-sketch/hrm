@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Edit Attendance - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>Edit Attendance Record</h2>
+        <small>{{ attendance.employee|default:"--" }} - {{ attendance.date }}</small>
+    </div>
+    <a href="{% url 'attendance_list' %}" class="btn btn-outline"><i class="ri-arrow-left-line"></i> Back</a>
+</div>
+
+<div class="form-container fade-in">
+    <form method="POST">
+        {% csrf_token %}
+        {% if form.errors %}
+        <div class="alert alert-danger"><i class="ri-error-warning-fill"></i> Please correct the errors below.</div>
+        {% endif %}
+        <div class="form-row">
+            <div class="form-group"><label>Employee</label>{{ form.employee }}</div>
+            <div class="form-group"><label>Date</label>{{ form.date }}</div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Time In</label>{{ form.time_in }}</div>
+            <div class="form-group"><label>Time Out</label>{{ form.time_out }}</div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Break In</label>{{ form.break_in }}</div>
+            <div class="form-group"><label>Break Out</label>{{ form.break_out }}</div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Status</label>{{ form.status }}</div>
+        </div>
+        <div class="form-group"><label>Remarks</label>{{ form.remarks }}</div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary"><i class="ri-save-line"></i> Update Record</button>
+            <a href="{% url 'attendance_list' %}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

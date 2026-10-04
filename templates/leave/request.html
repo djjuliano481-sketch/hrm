@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}New Leave Request - HRM System{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="page-title">
+        <h2>New Leave Request</h2>
+        <small>Submit a leave request</small>
+    </div>
+    <a href="{% url 'leave_list' %}" class="btn btn-outline"><i class="ri-arrow-left-line"></i> Back</a>
+</div>
+
+<div class="form-container fade-in">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% if form.errors %}
+        <div class="alert alert-danger"><i class="ri-error-warning-fill"></i> Please correct the errors below.</div>
+        {% endif %}
+
+        <div class="form-row">
+            <div class="form-group">
+                <label>Leave Type</label>
+                {{ form.leave_type }}
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Start Date</label>
+                {{ form.start_date }}
+            </div>
+            <div class="form-group">
+                <label>End Date</label>
+                {{ form.end_date }}
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Reason</label>
+            {{ form.reason }}
+        </div>
+        <div class="form-group">
+            <label>Supporting Document (optional)</label>
+            {{ form.supporting_document }}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="ri-send-plane-line"></i> Submit Request
+            </button>
+            <a href="{% url 'leave_list' %}" class="btn btn-outline btn-lg">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
